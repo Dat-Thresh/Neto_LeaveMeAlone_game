@@ -8,11 +8,16 @@
 #include "Components/InputComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "LMA_HealthComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+
+
+
 
 // Sets default values
 ALMADefaultCharacter::ALMADefaultCharacter()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+
 	PrimaryActorTick.bCanEverTick = true;
 
 	SpringArmComponent = CreateDefaultSubobject<USpringArmComponent>("SpringArm");
@@ -31,6 +36,10 @@ ALMADefaultCharacter::ALMADefaultCharacter()
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
+
+	HealthComponent = CreateDefaultSubobject<ULMA_HealthComponent>("HealthComponent");
+	HealthComponent->OnDeath.AddUObject(this, &ALMADefaultCharacter::OnDeath);
+
 }
 
 // Called when the game starts or when spawned
@@ -43,6 +52,8 @@ void ALMADefaultCharacter::BeginPlay()
 		CurrentCursor = UGameplayStatics::SpawnDecalAtLocation(GetWorld(), CursorMaterial, CursorSize,
 			FVector(0));
 	}
+	OnHealthChanged(HealthComponent->GetHealth());
+	HealthComponent->OnHealthChanged.AddUObject(this, &ALMADefaultCharacter::OnHealthChanged);
 	
 }
 
@@ -50,20 +61,12 @@ void ALMADefaultCharacter::BeginPlay()
 void ALMADefaultCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-	if (PC)
+	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("Stamina = %f"), Endurance));
+	if (!(HealthComponent->IsDead()))
 	{
-		FHitResult ResultHit;
-		PC->GetHitResultUnderCursor(ECC_GameTraceChannel1, true, ResultHit);
-		float FindRotatorResultYaw = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(),
-			ResultHit.Location).Yaw;
-		SetActorRotation(FQuat(FRotator(0.0f, FindRotatorResultYaw, 0.0f)));
-		if (CurrentCursor)
-		{
-			CurrentCursor->SetWorldLocation(ResultHit.Location);
-		}
+		RotationPlayerOnCursor();
+		CheckSprintPossibility();	
 	}
-
 }
 
 // Called to bind functionality to input
@@ -73,7 +76,8 @@ void ALMADefaultCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	PlayerInputComponent->BindAxis("MoveForward", this, &ALMADefaultCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &ALMADefaultCharacter::MoveRight);
 	PlayerInputComponent->BindAxis("CameraZoom", this, &ALMADefaultCharacter::CameraZoom);
-
+	PlayerInputComponent->BindAction("Sprint", EInputEvent::IE_Pressed, this, &ALMADefaultCharacter::SprintStart);
+	PlayerInputComponent->BindAction("Sprint", EInputEvent::IE_Released, this, &ALMADefaultCharacter::SprintStop);
 }
 
 void ALMADefaultCharacter::MoveForward(float Value)
@@ -95,4 +99,74 @@ void ALMADefaultCharacter::CameraZoom(float Value)
 	
 }
 
+void ALMADefaultCharacter::OnDeath()
+{
+	CurrentCursor->DestroyRenderState_Concurrent();
+	PlayAnimMontage(DeathMontage);
+	GetCharacterMovement()->DisableMovement();
+	SetLifeSpan(5.0f);
+	if (Controller)
+	{
+		Controller->ChangeState(NAME_Spectating);
+	}
+}
 
+void ALMADefaultCharacter::RotationPlayerOnCursor()
+{
+	APlayerController* PC = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	if (PC)
+	{
+		FHitResult ResultHit;
+		PC->GetHitResultUnderCursor(ECC_GameTraceChannel1, true, ResultHit);
+		float FindRotatorResultYaw = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(),
+			ResultHit.Location).Yaw;
+		SetActorRotation(FQuat(FRotator(0.0f, FindRotatorResultYaw, 0.0f)));
+		if (CurrentCursor)
+		{
+			CurrentCursor->SetWorldLocation(ResultHit.Location);
+		}
+	}
+}
+
+void ALMADefaultCharacter::OnHealthChanged(float NewHealth)
+{
+	//GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("Health = %f"), NewHealth));
+}
+
+
+void ALMADefaultCharacter::SprintStart()
+{
+	
+	if (Endurance > 0) {
+		isOnSprint = true;
+		GetCharacterMovement()->MaxWalkSpeed = 600.0f;
+	}
+	
+}
+
+void ALMADefaultCharacter::SprintStop()
+{
+	isOnSprint = false;
+	GetCharacterMovement()->MaxWalkSpeed = 300.0f;
+}
+
+void ALMADefaultCharacter::CheckSprintPossibility(){
+		if (!isOnSprint) {
+			if (Endurance < MaxEndurance) {
+				//Endurance += RecoveryEnduranceByTick;
+				Endurance = FMath::Clamp(Endurance + RecoveryEnduranceByTick, 0.0f, MaxEndurance);
+			}
+		}
+		else {
+			if (Endurance > 0) {
+				//Endurance -= LooseEnduranceByTick;
+				Endurance = FMath::Clamp(Endurance - LooseEnduranceByTick, 0.0f, MaxEndurance);
+			}
+		}
+		if (Endurance <= 0) {
+			SprintStop();
+		}
+}
+
+
+	

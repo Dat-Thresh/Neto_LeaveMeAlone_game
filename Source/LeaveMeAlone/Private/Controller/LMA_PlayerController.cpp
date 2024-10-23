@@ -12,3 +12,9 @@ void ALMA_PlayerController::BeginPlay() {
 	SetInputMode(FInputModeGameOnly());
 	bShowMouseCursor = false;
 }
+
+void ALMA_PlayerController::BeginSpectatingState()
+{
+	SetControlRotation(FRotator(-75.0f, 0.0f, 0.0f));
+	Super::BeginSpectatingState();
+}
