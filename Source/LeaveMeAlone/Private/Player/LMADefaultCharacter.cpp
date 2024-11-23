@@ -10,6 +10,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "LMA_HealthComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Weapon/LMAWeaponComponent.h"
 
 
 
@@ -39,6 +40,8 @@ ALMADefaultCharacter::ALMADefaultCharacter()
 
 	HealthComponent = CreateDefaultSubobject<ULMA_HealthComponent>("HealthComponent");
 	HealthComponent->OnDeath.AddUObject(this, &ALMADefaultCharacter::OnDeath);
+
+	WeaponComponent = CreateDefaultSubobject<ULMAWeaponComponent>("Weapon");
 
 }
 
@@ -78,6 +81,9 @@ void ALMADefaultCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	PlayerInputComponent->BindAxis("CameraZoom", this, &ALMADefaultCharacter::CameraZoom);
 	PlayerInputComponent->BindAction("Sprint", EInputEvent::IE_Pressed, this, &ALMADefaultCharacter::SprintStart);
 	PlayerInputComponent->BindAction("Sprint", EInputEvent::IE_Released, this, &ALMADefaultCharacter::SprintStop);
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, WeaponComponent, &ULMAWeaponComponent::Fire);
+	PlayerInputComponent->BindAction("Fire", IE_Released, WeaponComponent, &ULMAWeaponComponent::StopFire);
+	PlayerInputComponent->BindAction("Reload", IE_Pressed, WeaponComponent, &ULMAWeaponComponent::Reload);
 }
 
 void ALMADefaultCharacter::MoveForward(float Value)
@@ -101,6 +107,7 @@ void ALMADefaultCharacter::CameraZoom(float Value)
 
 void ALMADefaultCharacter::OnDeath()
 {
+	WeaponComponent->StopFire();
 	CurrentCursor->DestroyRenderState_Concurrent();
 	PlayAnimMontage(DeathMontage);
 	GetCharacterMovement()->DisableMovement();

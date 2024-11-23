@@ -11,6 +11,7 @@ class UCameraComponent;
 class USpringArmComponent;
 class ULMA_HealthComponent;
 class UAnimMontage;
+class ULMAWeaponComponent;
 
 UCLASS()
 class LEAVEMEALONE_API ALMADefaultCharacter : public ACharacter
@@ -67,6 +68,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stamina")
 	float LooseEnduranceByTick = 5.0f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	ULMAWeaponComponent* WeaponComponent;
 
 	/*METHODS*/
 private:
