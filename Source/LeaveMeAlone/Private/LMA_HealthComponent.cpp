@@ -56,3 +56,7 @@ bool ULMA_HealthComponent::AddHealth(float NewHealth)
 	OnHealthChanged.Broadcast(Health);
 	return true;
 }
+
+
+
+

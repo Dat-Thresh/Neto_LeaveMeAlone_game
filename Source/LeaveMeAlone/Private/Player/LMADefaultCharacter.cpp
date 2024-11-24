@@ -55,8 +55,8 @@ void ALMADefaultCharacter::BeginPlay()
 		CurrentCursor = UGameplayStatics::SpawnDecalAtLocation(GetWorld(), CursorMaterial, CursorSize,
 			FVector(0));
 	}
-	OnHealthChanged(HealthComponent->GetHealth());
-	HealthComponent->OnHealthChanged.AddUObject(this, &ALMADefaultCharacter::OnHealthChanged);
+	//OnHealthChanged(HealthComponent->GetHealth());
+	//HealthComponent->OnHealthChanged.AddUObject(this, &ALMADefaultCharacter::OnHealthChanged);
 	
 }
 
@@ -64,7 +64,7 @@ void ALMADefaultCharacter::BeginPlay()
 void ALMADefaultCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("Stamina = %f"), Endurance));
+	//GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("Stamina = %f"), Endurance));
 	if (!(HealthComponent->IsDead()))
 	{
 		RotationPlayerOnCursor();
@@ -135,10 +135,10 @@ void ALMADefaultCharacter::RotationPlayerOnCursor()
 	}
 }
 
-void ALMADefaultCharacter::OnHealthChanged(float NewHealth)
-{
-	//GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("Health = %f"), NewHealth));
-}
+//void ALMADefaultCharacter::OnHealthChanged(float NewHealth)
+//{
+//	//GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Red, FString::Printf(TEXT("Health = %f"), NewHealth));
+//}
 
 
 void ALMADefaultCharacter::SprintStart()

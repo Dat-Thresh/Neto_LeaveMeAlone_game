@@ -101,6 +101,6 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	void OnHealthChanged(float NewHealth);
+	/*void OnHealthChanged(float NewHealth);*/
 
 };

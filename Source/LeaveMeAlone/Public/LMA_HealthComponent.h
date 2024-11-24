@@ -26,6 +26,7 @@ protected:
 public:	
 	// Sets default values for this component's properties
 	ULMA_HealthComponent();
+	
 
 	UFUNCTION(BlueprintCallable)
 	float GetHealth() const { return Health; }
@@ -36,8 +37,10 @@ public:
 	DECLARE_MULTICAST_DELEGATE(FOnDeath);
 	FOnDeath OnDeath;
 
+	
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnHealthChanged, float);
 	FOnHealthChanged OnHealthChanged;
+
 
 	bool AddHealth(float NewHealth);
 	bool IsHealthFull() const;

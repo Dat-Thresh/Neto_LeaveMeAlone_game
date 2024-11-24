@@ -47,7 +47,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
 	double FireRate = 0.15f;
 	
-
 	FTimerHandle FireTimer;
 
 //***METHODS***//
@@ -58,8 +57,12 @@ public:
 	void DecrementBullets();
 	bool IsCurrentClipEmpty() const;
 	void ChangeClip();
+
+	UFUNCTION(BlueprintCallable)
 	void StopFire();
+
 	bool IsCurrentClipFull() const;
+	FAmmoWeapon GetCurrentAmmoWeapon() const { return CurrentAmmoWeapon; } 
 
 protected:
 	// Called when the game starts or when spawned

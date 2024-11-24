@@ -46,7 +46,8 @@ public:
 	bool CanReload() const;
 	void NewReload();
 	void BulletsOff();
-
+	UFUNCTION(BlueprintCallable)
+	bool GetCurrentWeaponAmmo(FAmmoWeapon& AmmoWeapon) const;
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
